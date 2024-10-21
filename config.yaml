@@ -1,0 +1,19 @@
+device: "cuda"
+dataset: "cifar10"
+classifier:
+  name: "resnet20"
+  checkpoint: "checkpoints/cifar10-r20.pth.tar"
+attacks:
+  - mode: "SSAH"
+    num_iteration: 10
+    learning_rate: 0.01
+    m: 1
+    alpha: 0.5
+    lambda_lf: 0.1
+    wave: "wavelet"
+  - mode: "DeepFool"
+    steps: 50
+    overshoot: 0.02
+    learning_rate: 0.005
+
+    

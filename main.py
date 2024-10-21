@@ -3,7 +3,62 @@ import torch
 import argparse
 import resnet # where ResNet() is defined
 import torchattacks
-import ssah_attack
+import ssah_attack # where the SSAH is defined
+
+
+# define a parse_arg(), so we could 
+# 1.swith between attack methods "SSAH", "PGD", "C&W" .etc
+# 2.change the parameters: 
+# -----batchsize, 
+#------dataset('cifar10', ''cifar100, 'imagenet'), 
+#------classifier('resnet20_cifar10', 'resnet20_cifar100', 'resnet50_imagenet')
+#------perceptual metric('ssim', 'lpips', 'l2' .etc)
+#------target mode('targeted' or 'untargeted'), if targeted , pick up a way to generate target labels
+
+
+
+
+# should I set the following parameters same for all attacks?
+# number_of_iterations
+# alpha
+# lambda
+# 
+
+# Set some parameters specific to each attack
+# if opt.perturb-mode === 'SSAH', we want to pop a window and ask:
+# (1) wavelet
+# (2) experiment_name
+
+# if opt.perturb-mode === 'SSAH', we want to pop a window and ask:
+# 
+
+def parse_arg():
+    parser = argparse.ArgumentParser(description='attack with feature layer and frequency constraint')  
+    parser.add_argument('--bs', type=int, default=10000, help="batch size")   
+    parser.add_argument('--dataset-root', type=str, default='dataset', help='dataset path')
+    parser.add_argument('--dataset', type=str, default='cifar10', help='data to attack')
+    parser.add_argument('--classifier', type=str, default='resnet20', help='model to attack')
+    parser.add_argument('--seed', type=int, default=18, help='random seed')
+    parser.add_argument('--perturb-mode', type=str, default='SSAH', help='attack method')
+    parser.add_argument('--max-epoch', type=int, default=1, help='always 1 in attack')
+    parser.add_argument('--workers', type=int, default=8, help='num workers to load img')
+    parser.add_argument('--wavelet', type=str, default='haar', choices=['haar', 'Daubechies', 'Cohen'])
+    parser.add_argument('--test-fid', action='store_true', help='test fid value')
+
+    # SSAH Attack Parameters
+    parser.add_argument('--num-iteration', type=int, default=150, help='MAX NUMBER ITERATION')
+    parser.add_argument('--learning-rate', type=float, default=0.001, help='LEARNING RATE')
+    parser.add_argument('--m', type=float, default=0.2, help='MARGIN')
+    parser.add_argument('--alpha', type=float, default=1.0, help='HYPER PARAMETER FOR ADV COST')
+    parser.add_argument('--lambda-lf', type=float, default=0.1, help='HYPER PARAMETER FOR LOW FREQUENCY CONSTRAINT')
+    parser.add_argument('--outdir', type=str, default='result', help='dir to save the attack examples')
+    parser.add_argument('--exp-name', type=str, default='SSAH', help='Experiment Name')
+
+    args = parser.parse_args()
+
+    return args
+
+
 
 # Define the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -43,13 +98,31 @@ classifier.eval()                  # Switch the classifier to evaluation mode, s
 classifier = classifier.to(device) # Load the classifier to the device
 
 
+
+opt.num_iteration = 150
+opt.learning_rate = 0.01
+
+
+
+  # bs=5000 \
+  # max-epoch=1 \
+  # wavelet='haar' \
+  # m=0.2 \
+  # alpha=1 \
+  # lambda-lf=0.1\
+  # seed=8\
+  # workers=32\
+  # test-fid
+
+
 # Load the attack
 if opt.perturb_mode == 'SSAH':
-  atk = SSAH(model=classifier,
+
+  atk = SSAH(model=opt.classifier,
             num_iteration=opt.num_iteration,
             learning_rate=opt.learning_rate,
             device=device,
-            Targeted=False,
+            Targeted=False,    # Have to change the code of SSAH to make it works with targeted is True
             dataset=opt.dataset,
             m=opt.m,
             alpha=opt.alpha,
