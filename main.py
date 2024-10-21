@@ -4,7 +4,9 @@ import argparse
 import resnet # where ResNet() is defined
 import torchattacks
 import ssah_attack # where the SSAH is defined
+import yaml
 
+from auxiliary_utils import *
 
 # define a parse_arg(), so we could 
 # 1.swith between attack methods "SSAH", "PGD", "C&W" .etc
@@ -30,118 +32,74 @@ import ssah_attack # where the SSAH is defined
 # (2) experiment_name
 
 # if opt.perturb-mode === 'SSAH', we want to pop a window and ask:
-# 
-
-def parse_arg():
-    parser = argparse.ArgumentParser(description='attack with feature layer and frequency constraint')  
-    parser.add_argument('--bs', type=int, default=10000, help="batch size")   
-    parser.add_argument('--dataset-root', type=str, default='dataset', help='dataset path')
-    parser.add_argument('--dataset', type=str, default='cifar10', help='data to attack')
-    parser.add_argument('--classifier', type=str, default='resnet20', help='model to attack')
-    parser.add_argument('--seed', type=int, default=18, help='random seed')
-    parser.add_argument('--perturb-mode', type=str, default='SSAH', help='attack method')
-    parser.add_argument('--max-epoch', type=int, default=1, help='always 1 in attack')
-    parser.add_argument('--workers', type=int, default=8, help='num workers to load img')
-    parser.add_argument('--wavelet', type=str, default='haar', choices=['haar', 'Daubechies', 'Cohen'])
-    parser.add_argument('--test-fid', action='store_true', help='test fid value')
-
-    # SSAH Attack Parameters
-    parser.add_argument('--num-iteration', type=int, default=150, help='MAX NUMBER ITERATION')
-    parser.add_argument('--learning-rate', type=float, default=0.001, help='LEARNING RATE')
-    parser.add_argument('--m', type=float, default=0.2, help='MARGIN')
-    parser.add_argument('--alpha', type=float, default=1.0, help='HYPER PARAMETER FOR ADV COST')
-    parser.add_argument('--lambda-lf', type=float, default=0.1, help='HYPER PARAMETER FOR LOW FREQUENCY CONSTRAINT')
-    parser.add_argument('--outdir', type=str, default='result', help='dir to save the attack examples')
-    parser.add_argument('--exp-name', type=str, default='SSAH', help='Experiment Name')
-
-    args = parser.parse_args()
-
-    return args
 
 
+# Load configurations
+with open('config.yaml', 'r') as f:
+    config = yaml.safe_load(f)
 
 # Define the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Load the data
-if opt.dataset == 'cifar10':
-    data, num_images = load_cifar10(opt)
-elif opt.dataset == 'cifar100':
-    data, num_images = load_cifar100(opt)
-else:
-    data, num_images = load_imagenet_val(opt)
+
+# Dataset: Load the data based on the dataset configuration
+if config['dataset'] == 'cifar10':
+    data, num_images = load_cifar10(config)
+elif config['dataset'] == 'cifar100':
+    data, num_images = load_cifar100(config)
+elif config['dataset'] == 'imagenet_val':
+    data, num_images = load_imagenet_val(config)
 
 
-# Load the classifier
-if opt.classifier == 'resnet20' and opt.dataset == 'cifar10':
-    path = 'checkpoints/cifar10-r20.pth.tar'
+
+#Classifier:  Load the classifier based on the dataset
+if config['dataset'] == 'cifar10':
+    path = "checkpoints/cifar10-r20.pth.tar"
     checkpoint = torch.load(path)
     state = checkpoint['state_dict']
-    classifier = ResNet(20, 10)
+    classifier = resnet.ResNet(20, 10)
     classifier.load_state_dict(state)
-elif opt.classifier == 'resnet20' and opt.dataset == 'cifar100':
-    path = 'checkpoints/cifar100-r20.pth.tar'
+elif config['dataset'] == 'cifar100':
+    path = "checkpoints/cifar100-r20.pth.tar"
     checkpoint = torch.load(path)
     state = checkpoint['state_dict']
-    classifier = ResNet(20, 100)
-    new_state_dict = OrderedDict()  #new_state_dict = OrderedDict(): Creates a new ordered dictionary.
+    classifier = resnet.ResNet(20, 100)
+    new_state_dict = OrderedDict()
     for k, v in state.items():
         if 'module.' in k:
-            name = k[7:]  # remove `module.`
+            name = k[7:]
         else:
             name = k
         new_state_dict[name] = v
     classifier.load_state_dict(new_state_dict)
-elif opt.classifier == 'resnet50' and opt.dataset == 'imagenet_val':
+elif config['dataset'] == 'imagenet_val':
     classifier = torchvision.models.resnet50(pretrained=True)
 classifier.eval()                  # Switch the classifier to evaluation mode, so its weights will not change
 classifier = classifier.to(device) # Load the classifier to the device
 
 
 
-opt.num_iteration = 150
-opt.learning_rate = 0.01
-
-
-
-  # bs=5000 \
-  # max-epoch=1 \
-  # wavelet='haar' \
-  # m=0.2 \
-  # alpha=1 \
-  # lambda-lf=0.1\
-  # seed=8\
-  # workers=32\
-  # test-fid
-
-
-# Load the attack
-if opt.perturb_mode == 'SSAH':
-
-  atk = SSAH(model=opt.classifier,
-            num_iteration=opt.num_iteration,
-            learning_rate=opt.learning_rate,
-            device=device,
-            Targeted=False,    # Have to change the code of SSAH to make it works with targeted is True
-            dataset=opt.dataset,
-            m=opt.m,
-            alpha=opt.alpha,
-            lambda_lf=opt.lambda_lf,
-            wave=opt.wavelet)
-elif opt.perturb_mode == 'DeepFool':
-  atk = torchattacks.DeepFool(model, steps=50, overshoot=0.02) 
-elif opt.perturb_mode == 'PGD':
-  atk = torchattacks.PGD(model, eps=8/255, alpha=2/225, steps=10, random_start=True)
-elif opt.perturb_mode == 'C&W':
-  atk = torchattacks.CW(model, c=1, kappa=0, steps=100, lr=0.01)
-elif opt.perturb_mode == 'JSMA':
-  atk = torchattacks.JSMA(model, theta=1.0, gamma=0.1)
-
-
-# Apply the attack
-for batch, (inputs, targets) in enumerate(data):
-  adv_images = atk(inputs, targets)
-# set the target mode?
+# Load and Apply the attacks
+for attack_config in config['attacks']:
+    if attack_config['mode'] == 'SSAH':
+        atk = SSAH(model=classifier,
+                   num_iteration=attack_config['num_iteration'],
+                   learning_rate=attack_config['learning_rate'],
+                   device=device,
+                   Targeted=False,
+                   dataset=config['dataset'],
+                   m=attack_config['m'],
+                   alpha=attack_config['alpha'],
+                   lambda_lf=attack_config['lambda_lf'],
+                   wave=attack_config['wave'])
+    elif attack_config['mode'] == 'PGD':
+        atk = torchattacks.PGD(model, steps=attack_config['eps'], alpha=attack_config['alpha'], steps=attack_config['steps'],random_start=attack_config['random_start'] )
+    elif attack_config['mode'] == 'CW':
+        atk = torchattacks.CW(model, c=attack_config['c'], kappa=attack_config['kappa'], steps=attack_config['steps'], lr=attack_config['lr'])
+    elif attack_config['mode'] == 'JSMA':
+        atk = torchattacks.JSMA(model, theta=attack_config['theta'], gamma=attack_config['gamma'])
+       
+    
 
 
 # Evaluation
