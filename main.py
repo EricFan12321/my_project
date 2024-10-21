@@ -3,6 +3,7 @@ import torch
 import argparse
 import resnet # where ResNet() is defined
 import torchattacks
+import ssah_attack
 
 # Define the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
