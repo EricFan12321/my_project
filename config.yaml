@@ -1,8 +1,7 @@
 device: "cuda"
-dataset: "cifar10"
+dataset: "cifar10"  # Options: cifar10, cifar100, imagenet_val
 classifier:
-  name: "resnet20"
-  checkpoint: "checkpoints/cifar10-r20.pth.tar"
+  name: "auto"  # The classifier will be selected automatically based on the dataset
 attacks:
   - mode: "SSAH"
     num_iteration: 10
@@ -15,5 +14,16 @@ attacks:
     steps: 50
     overshoot: 0.02
     learning_rate: 0.005
-
-    
+  - mode: "PGD"
+    eps: 8/255
+    alpha: 2/225
+    steps: 10
+    random_start: True
+  - mode: "CW"
+    c: 1
+    kappa: 0
+    steps: 100
+    lr: 0.01
+  - mode: "CW"
+    theta: 1.0
+    gamma: 0.1

@@ -52,7 +52,7 @@ elif config['dataset'] == 'imagenet_val':
 
 
 
-#Classifier:  Load the classifier based on the dataset
+#Classifier: Load the classifier based on the dataset
 if config['dataset'] == 'cifar10':
     path = "checkpoints/cifar10-r20.pth.tar"
     checkpoint = torch.load(path)
