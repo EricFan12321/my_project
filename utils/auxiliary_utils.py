@@ -4,8 +4,9 @@ import random
 import torch
 import os
 import logging
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
+
+
+# Load dataset
 
 def load_cifar10(dataset_root, batch_size, num_workers):
     path = os.path.join(dataset_root, 'cifar10/')
