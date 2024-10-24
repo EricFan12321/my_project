@@ -13,6 +13,7 @@
 
 # Navigate to your project directory
 cd /home/user/eric123/my_project/test
+
 # Load Miniconda
 export PATH=~/miniconda3/bin:$PATH
 
@@ -21,6 +22,9 @@ source ~/miniconda3/etc/profile.d/conda.sh
 
 # Activate the conda environment
 conda activate py310
+
+# Set PYTHONPATH to include the project directory
+export PYTHONPATH=$PYTHONPATH:/home/user/eric123/my_project
 
 # Check GPU availability
 echo "Checking GPU availability with nvidia-smi:"

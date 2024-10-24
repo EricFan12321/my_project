@@ -1,13 +1,14 @@
 import yaml
 import sys
 import os
+import torch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils')))
 
 from utils import *
 
 # Load configurations
-with open('config.yaml', 'r') as f:
+with open('../config.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
 # Define the device
