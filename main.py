@@ -1,7 +1,7 @@
 #import the neccessary packages
 import torch
 import torchattacks
-import ssah_attack # where the SSAH is defined
+from attacks import ssah_attack # where the SSAH is defined
 import yaml
 
 from utils.utils import *
@@ -88,18 +88,18 @@ new_labels = (labels + 1) % 10
 # Intialize some parameters
 total_img = 0
 att_suc_img = 0
-for batch, (inputs, targets) in enumerate(data): # enumerate(data) provides both the batch index (batch) and the batch data (inputs and targets).
+for batch, (inputs, labels) in enumerate(data): # enumerate(data) provides both the batch index (batch) and the batch data (inputs and labels).
     inputs = inputs.to(device)
-    targets = targets.to(device)
-    common_id = common(targets, predict(classifier, inputs, opt)) # common_id stores the indices of the correctly classified images by comparing the true labels (targets) with the predictions from the classifier.
+    labels = labels.to(device)
+    common_id = common(labels, predict(classifier, inputs, opt)) # common_id stores the indices of the correctly classified images by comparing the true labels (labels) with the predictions from the classifier.
     total_img += len(common_id)          # total_img is incremented by the number of correctly classified images.
-    inputs = inputs[common_id].cuda()   # The inputs and targets are filtered to include only the correctly classified images and moved to the GPU.
-    targets = targets[common_id].cuda()
+    inputs = inputs[common_id].cuda()   # The inputs and labels are filtered to include only the correctly classified images and moved to the GPU.
+    labels = labels[common_id].cuda()
 
     # attack
     adv = att(inputs)
 
-    att_suc_id = attack_success(targets, predict(classifier, adv, opt)) # return the id where "predicted labels == targeted labels"
+    att_suc_id = attack_success(labels, predict(classifier, adv, opt)) # return the id where "predicted labels != true labels"
     att_suc_img += len(att_suc_id)
 
     adv = adv[att_suc_id]         # only keep the adversarial images where the attack is successful
