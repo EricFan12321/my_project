@@ -68,7 +68,7 @@ for attack_config in config['attacks']:
                    lambda_lf=attack_config['lambda_lf'],
                    wave=attack_config['wave'])
     elif attack_config['mode'] == 'PGD':
-        atk = torchattacks.PGD(model, steps=attack_config['eps'], alpha=attack_config['alpha'], steps=attack_config['steps'],random_start=attack_config['random_start'] )
+        atk = torchattacks.PGD(model, eps=attack_config['eps'], alpha=attack_config['alpha'], steps=attack_config['steps'], random_start=attack_config['random_start'])
     elif attack_config['mode'] == 'CW':
         atk = torchattacks.CW(model, c=attack_config['c'], kappa=attack_config['kappa'], steps=attack_config['steps'], lr=attack_config['lr'])
     elif attack_config['mode'] == 'JSMA':
