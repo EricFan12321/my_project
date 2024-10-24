@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/eric123/my_project/test/test_load_data.py", line 2, in <module>
+    from utils.utils import *
+ModuleNotFoundError: No module named 'utils'
+srun: error: gpu06: task 0: Exited with exit code 1

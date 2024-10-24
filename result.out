@@ -1,5 +1,5 @@
 Checking GPU availability with nvidia-smi:
-Wed Oct 16 16:32:16 2024       
+Thu Oct 24 15:43:57 2024       
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.183.01             Driver Version: 535.183.01   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
@@ -7,8 +7,8 @@ Wed Oct 16 16:32:16 2024
 | Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
 |                                         |                      |               MIG M. |
 |=========================================+======================+======================|
-|   0  NVIDIA A100-SXM4-80GB          On  | 00000000:07:00.0 Off |                    0 |
-| N/A   28C    P0              62W / 400W |      0MiB / 81920MiB |      0%      Default |
+|   0  NVIDIA A100-SXM4-80GB          On  | 00000000:0F:00.0 Off |                    0 |
+| N/A   25C    P0              60W / 400W |      0MiB / 81920MiB |      0%      Default |
 |                                         |                      |             Disabled |
 +-----------------------------------------+----------------------+----------------------+
                                                                                          
@@ -19,7 +19,3 @@ Wed Oct 16 16:32:16 2024
 |=======================================================================================|
 |  No running processes found                                                           |
 +---------------------------------------------------------------------------------------+
-Python Path: ['/home/user/eric123/project', '/home/user/eric123/miniconda3/envs/py36/lib/python36.zip', '/home/user/eric123/miniconda3/envs/py36/lib/python3.6', '/home/user/eric123/miniconda3/envs/py36/lib/python3.6/lib-dynload', '/home/user/eric123/miniconda3/envs/py36/lib/python3.6/site-packages', '/home/user/eric123/project']
-Files already downloaded and verified
-Files already downloaded and verified
-Accuracy of the network on the 10000 test images: 85 %
