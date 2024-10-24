@@ -1,5 +1,8 @@
 device: "cuda"
 dataset: "cifar100"  # Options: cifar10, cifar100, imagenet_val
+'dataset_root': './data'
+bs: 32  # Default batch size
+workers: 2  # Default number of workers
 classifier:
   name: "auto"  # The classifier will be selected automatically based on the dataset
 attacks:
