@@ -3,6 +3,7 @@ import torch
 import torchattacks
 import yaml
 from attacks import ssah_attack 
+from collections import OrderedDict
 from utils.utils import *
 from model.resnet import ResNet 
 
@@ -17,8 +18,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 dataset_root = config.get('dataset_root', './data') # If dataset_root is not specified, it defaults to './data'
 batch_size = config.get('bs', 32)    # If bs is not specified, it defaults to 32.
 num_workers = config.get('workers', 2) # If workers is not specified, it defaults to 2.
-
-# what if for different dataset, (batchsize, num_workers) is different???
 
 # Dataset: Load the data based on the dataset configuration
 if config['dataset'] == 'cifar10':

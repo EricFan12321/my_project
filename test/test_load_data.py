@@ -21,3 +21,9 @@ elif config['dataset'] == 'cifar100':
 elif config['dataset'] == 'imagenet_val':
     data, num_images = load_imagenet_val(dataset_root, batch_size, num_workers)
 
+# Check if data is successfully loaded
+try:
+    sample_data, sample_labels = next(iter(data))
+    print(f"Data successfully loaded. Sample data shape: {sample_data.shape}, Sample labels shape: {sample_labels.shape}")
+except Exception as e:
+    print(f"Failed to load data: {e}")

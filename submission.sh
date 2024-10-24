@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH --partition=gpu-a100
-#SBATCH --job-name=experiment1
+#SBATCH --job-name= test_load_data
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1  # Request 1 GPU
@@ -12,7 +12,7 @@
 #SBATCH --mail-user=liming.fan333@gmail.com
 
 # Navigate to your project directory
-cd /home/user/eric123/project
+cd /home/user/eric123/my_project/test
 # Load Miniconda
 export PATH=~/miniconda3/bin:$PATH
 
@@ -27,6 +27,6 @@ echo "Checking GPU availability with nvidia-smi:"
 nvidia-smi
 
 # Run your Python script
-srun python test_the_model.py
+srun python test_load_data.py
 # Deactivate the conda environment
 conda deactivate
