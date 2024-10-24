@@ -1,12 +1,10 @@
 #import the neccessary packages
 import torch
 import torchattacks
-from attacks import ssah_attack # where the SSAH is defined
 import yaml
-
+from attacks import ssah_attack 
 from utils.utils import *
-from model.resnet import ResNet # where ResNet() is defined
-
+from model.resnet import ResNet 
 
 # Load configurations
 with open('config.yaml', 'r') as f:
@@ -14,7 +12,6 @@ with open('config.yaml', 'r') as f:
 
 # Define the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 # Dataset: Load the data based on the dataset configuration
 dataset_root = config.get('dataset_root', './data') # If dataset_root is not specified, it defaults to './data'
@@ -53,8 +50,8 @@ elif config['dataset'] == 'cifar100':
     classifier.load_state_dict(new_state_dict)
 elif config['dataset'] == 'imagenet_val':
     classifier = torchvision.models.resnet50(pretrained=True)
-classifier.eval()                  # Switch the classifier to evaluation mode, so its weights will not change
-classifier = classifier.to(device) # Load the classifier to the device
+classifier.eval()                  
+classifier = classifier.to(device) 
 
 
 
@@ -77,11 +74,6 @@ for attack_config in config['attacks']:
         atk = torchattacks.CW(model, c=attack_config['c'], kappa=attack_config['kappa'], steps=attack_config['steps'], lr=attack_config['lr'])
     elif attack_config['mode'] == 'JSMA':
         atk = torchattacks.JSMA(model, theta=attack_config['theta'], gamma=attack_config['gamma'])
-       
-atk.set_mode_targeted_by_label()
-
-#Get the target labels
-new_labels = (labels + 1) % 10
 
 
 # Evaluation
@@ -97,9 +89,17 @@ for batch, (inputs, labels) in enumerate(data): # enumerate(data) provides both 
     labels = labels[common_id].cuda()
 
     # attack
-    adv = att(inputs)
+    adv = atk(inputs)
 
-    att_suc_id = attack_success(labels, predict(classifier, adv, opt)) # return the id where "predicted labels != true labels"
+    if atk.target:
+        # Targeted attack evaluation: Check if adversarial examples are classified as target labels
+        atk.set_mode_targeted_by_label()
+        targets = (labels + 1) % 10  # Generate target labels
+        att_suc_id = attack_success(targets, predict(classifier, adv, opt)) # return the id where "predicted labels == targeted labels"
+    else:
+        # Untargeted attack evaluation: Check if adversarial examples are misclassified
+        att_suc_id = attack_success(labels, predict(classifier, adv, opt)) # return the id where "predicted labels != true labels"
+
     att_suc_img += len(att_suc_id)
 
     adv = adv[att_suc_id]         # only keep the adversarial images where the attack is successful
@@ -110,28 +110,12 @@ sar = 100.0 * att_suc_img / total_img
 print(f"Overall Success Attack Rate (SAR): {sar:.2f}%")
 
 
-
-# define a parse_arg(), so we could 
-# 1.swith between attack methods "SSAH", "PGD", "C&W" .etc
-# 2.change the parameters: 
-# -----batchsize, 
-#------dataset('cifar10', ''cifar100, 'imagenet'), 
-#------classifier('resnet20_cifar10', 'resnet20_cifar100', 'resnet50_imagenet')
-#------perceptual metric('ssim', 'lpips', 'l2' .etc)
-#------target mode('targeted' or 'untargeted'), if targeted , pick up a way to generate target labels
+# Compute the lpips distance between adv & original images
 
 
 
 
-# should I set the following parameters same for all attacks?
-# number_of_iterations
-# alpha
-# lambda
-# 
 
-# Set some parameters specific to each attack
-# if opt.perturb-mode === 'SSAH', we want to pop a window and ask:
-# (1) wavelet
-# (2) experiment_name
 
-# if opt.perturb-mode === 'SSAH', we want to pop a window and ask:
+
+

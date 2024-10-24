@@ -1,11 +1,21 @@
 import torch
 import torch.nn as nn
-from auxiliary_utils import *
 import torch.nn.functional as F
-from DWT import *
-from torch.autograd import Variable
 import torch.optim as optim
+import pywt
+import numpy as np
+import math
+
+from DWT import *
+from torch.nn import Module
+from torch.autograd import Variable, Function
 from torchattacks import Attack
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils')))
+from utils import *
+
 
 
 class SSAH(Attack):
