@@ -20,7 +20,7 @@ export PATH=~/miniconda3/bin:$PATH
 source ~/miniconda3/etc/profile.d/conda.sh
 
 # Activate the conda environment
-conda activate py36
+conda activate py310
 
 # Check GPU availability
 echo "Checking GPU availability with nvidia-smi:"
@@ -28,5 +28,6 @@ nvidia-smi
 
 # Run your Python script
 srun python test_load_data.py
+
 # Deactivate the conda environment
 conda deactivate
