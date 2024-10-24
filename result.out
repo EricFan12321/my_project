@@ -1,5 +1,5 @@
 Checking GPU availability with nvidia-smi:
-Thu Oct 24 18:21:01 2024       
+Thu Oct 24 19:08:16 2024       
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.183.01             Driver Version: 535.183.01   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
@@ -19,6 +19,3 @@ Thu Oct 24 18:21:01 2024
 |=======================================================================================|
 |  No running processes found                                                           |
 +---------------------------------------------------------------------------------------+
-Downloading https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz to ./data/cifar-100-python/cifar-100-python.tar.gz
-Extracting ./data/cifar-100-python/cifar-100-python.tar.gz to ./data/cifar-100-python/
-Data successfully loaded. Sample data shape: torch.Size([32, 3, 32, 32]), Sample labels shape: torch.Size([32])
