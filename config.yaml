@@ -1,5 +1,5 @@
 device: "cuda"
-dataset: "cifar10"  # Options: cifar10, cifar100, imagenet_val
+dataset: "cifar100"  # Options: cifar10, cifar100, imagenet_val
 classifier:
   name: "auto"  # The classifier will be selected automatically based on the dataset
 attacks:
